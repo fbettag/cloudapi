@@ -1,5 +1,5 @@
 defmodule CloudAPI.Machine do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Machine
   """
   use Ecto.Schema
@@ -35,7 +35,7 @@ defmodule CloudAPI.Machine do
 end
 
 defmodule CloudAPI.Machine.Snapshot do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Machine Snapshot
   """
   use Ecto.Schema
@@ -50,7 +50,7 @@ defmodule CloudAPI.Machine.Snapshot do
 end
 
 defmodule CloudAPI.Machine.Disk do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Machine Disk
   """
   use Ecto.Schema
@@ -66,7 +66,7 @@ defmodule CloudAPI.Machine.Disk do
 end
 
 defmodule CloudAPI.CreateMachine do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Machine Create
   """
   use Ecto.Schema
@@ -89,7 +89,7 @@ defmodule CloudAPI.CreateMachine do
 end
 
 defmodule CloudAPI.CreateMachine.Volume do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Machine Create Volume
   """
   use Ecto.Schema
@@ -105,7 +105,7 @@ defmodule CloudAPI.CreateMachine.Volume do
 end
 
 defmodule CloudAPI.CreateMachine.Disk do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Machine Disk during Creation
   """
   import CloudAPI.Machine.Disk

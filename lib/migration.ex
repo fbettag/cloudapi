@@ -1,5 +1,5 @@
 defmodule CloudAPI.Migration do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Migration
   """
   use Ecto.Schema
@@ -19,7 +19,7 @@ defmodule CloudAPI.Migration do
 end
 
 defmodule CloudAPI.Migration.ProgressHistory do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Migration Progress-History Event
   """
   use Ecto.Schema

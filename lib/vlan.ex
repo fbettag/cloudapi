@@ -1,5 +1,5 @@
 defmodule CloudAPI.VLAN do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI VLAN
   """
   use Ecto.Schema

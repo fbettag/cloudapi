@@ -6,11 +6,11 @@ defmodule CloudAPI.Mixfile do
   def project do
     [
       app:              :cloudapi,
-      version:          "0.0.1",
+      version:          "0.0.2",
       elixir:           "~> 1.4",
       source_url:       @project_url,
       homepage_url:     @project_url,
-      name:             "Joyent CloudAPI implemented in Elixir and Poison",
+      name:             "Joyent CloudAPI",
       description:      "This package implements the full CloudAPI for managing Joyent Triton clusters.",
       build_embedded:   Mix.env == :prod,
       start_permanent:  Mix.env == :prod,

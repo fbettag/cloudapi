@@ -1,5 +1,5 @@
 defmodule CloudAPI.Config do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Config
   """
   use Ecto.Schema

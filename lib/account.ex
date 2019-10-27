@@ -1,5 +1,5 @@
 defmodule CloudAPI.Account do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Account
   """
   use Ecto.Schema

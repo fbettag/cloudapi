@@ -1,5 +1,5 @@
 defmodule CloudAPI.Policy do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Policy
   """
   use Ecto.Schema

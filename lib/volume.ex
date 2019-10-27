@@ -1,5 +1,5 @@
 defmodule CloudAPI.Volume do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Volume
   """
   use Ecto.Schema

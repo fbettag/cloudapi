@@ -1,5 +1,5 @@
 defmodule CloudAPI.Role do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Role
   """
   use Ecto.Schema
@@ -14,7 +14,7 @@ defmodule CloudAPI.Role do
 end
 
 defmodule CloudAPI.Role.Policy do
-  @moduledoc """
+  @typedoc """
   This structure represents a Role Policy
   """
   use Ecto.Schema
@@ -27,7 +27,7 @@ defmodule CloudAPI.Role.Policy do
 end
 
 defmodule CloudAPI.Role.Member do
-  @moduledoc """
+  @typedoc """
   This structure represents a Role Member
   """
   use Ecto.Schema

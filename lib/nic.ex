@@ -1,5 +1,5 @@
 defmodule CloudAPI.NIC do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI NIC
   """
   use Ecto.Schema

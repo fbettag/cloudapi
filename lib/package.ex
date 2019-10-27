@@ -1,5 +1,5 @@
 defmodule CloudAPI.Package do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Package
   """
   use Ecto.Schema

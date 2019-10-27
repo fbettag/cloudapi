@@ -1,5 +1,5 @@
 defmodule CloudAPI.Image do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Image
   """
   use Ecto.Schema
@@ -28,7 +28,7 @@ defmodule CloudAPI.Image do
 end
 
 defmodule CloudAPI.Image.Requirements do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Image Requirement.
   """
   use Ecto.Schema
@@ -45,7 +45,7 @@ defmodule CloudAPI.Image.Requirements do
 end
 
 defmodule CloudAPI.Image.File do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Image File.
   """
   use Ecto.Schema
@@ -59,7 +59,7 @@ defmodule CloudAPI.Image.File do
 end
 
 defmodule CloudAPI.CreateImageFromMachine do
-  @moduledoc """
+  @typedoc """
   This structure represents data to create a CloudAPI Image from a Virtual Machine
   """
   use Ecto.Schema

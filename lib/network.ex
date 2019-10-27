@@ -1,5 +1,5 @@
 defmodule CloudAPI.Network do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Network
   """
   use Ecto.Schema
@@ -22,7 +22,7 @@ defmodule CloudAPI.Network do
 end
 
 defmodule CloudAPI.Network.IP do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Network IP
   """
   use Ecto.Schema

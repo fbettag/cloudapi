@@ -1,5 +1,5 @@
 defmodule CloudAPI.Key do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Key
   """
   use Ecto.Schema

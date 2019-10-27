@@ -1,5 +1,5 @@
 defmodule CloudAPI.FirewallRule do
-  @moduledoc """
+  @typedoc """
   This structure represents a CloudAPI Firewall Rule
   """
   use Ecto.Schema
