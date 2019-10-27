@@ -709,7 +709,7 @@ defmodule CloudAPI do
   end
 
   @doc """
-
+  Delete a machine.
 
   ## Parameters
 
