@@ -811,7 +811,7 @@ defmodule CloudAPI do
   @doc """
   Stop a machine.
 
-  You can poll with `get_machine' for the current state.
+  You can poll with `get_machine` for the current state.
 
   ## Parameters
 
@@ -829,7 +829,7 @@ defmodule CloudAPI do
   @doc """
   Start a machine.
 
-  You can poll with `get_machine' for the current state.
+  You can poll with `get_machine` for the current state.
 
   ## Parameters
 
@@ -847,7 +847,7 @@ defmodule CloudAPI do
   @doc """
   Reboot a machine.
 
-  You can poll with `get_machine' for the current state.
+  You can poll with `get_machine` for the current state.
 
   ## Parameters
 
