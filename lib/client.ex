@@ -5,32 +5,20 @@ defmodule CloudAPI.Client do
 
   use HTTPoison.Base
 
-  def process_url(url) do
-    endpoint = Application.fetch_env!(:cloudapi, :endpoint)
-    endpoint <> url
-  end
-
   def run(full_cmd) do
     System.cmd("/bin/sh", ["-c", full_cmd])
   end
 
-  def generate_auth_header() do
-    keyfile = Application.fetch_env!(:cloudapi, :keyfile)
+  def auth_headers(dc = %CloudAPI.Datacenter{}) do
     date_cmd = "date -u '+%a, %d %h %Y %H:%M:%S GMT' | tr -d '\n'"
-    {now, _} = run date_cmd
-    {signature, _} = run "#{date_cmd} | openssl dgst -sha256 -sign #{keyfile} | openssl enc -e -a | tr -d '\n'"
-    {now, signature}
-  end
+    {date, _} = run date_cmd
+    {signature, _} = run "#{date_cmd} | openssl dgst -sha256 -sign #{dc.keyfile} | openssl enc -e -a | tr -d '\n'"
 
-  def process_request_headers(headers) do
-    account = Application.fetch_env!(:cloudapi, :account)
-    keyname = Application.fetch_env!(:cloudapi, :keyname)
-    {date, signature} = generate_auth_header()
-    headers ++ [
+    [
       "Accept": "application/json",
       "Accept-Version": "~8",
       "Date": date,
-      "Authorization": "Signature keyId=\"/#{account}/keys/#{keyname}\",algorithm=\"rsa-sha256\" #{signature}"
+      "Authorization": "Signature keyId=\"/#{dc.account}/keys/#{dc.keyname}\",algorithm=\"rsa-sha256\" #{signature}"
     ]
   end
 

@@ -12,11 +12,13 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec get_account(String.t()) :: Tuple.t()
-  def get_account(login \\ "my") do
-    Client.response_as Client.get("/" <> login), as: %CloudAPI.Account{}
+  @spec get_account(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def get_account(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    Client.response_as Client.get("/" <> login, auth_headers), as: %CloudAPI.Account{}
   end
 
   @doc """
@@ -24,14 +26,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - account: %CloudAPI.Account{} with the details you want updated.
   """
-  @spec update_account(String.t(), CloudAPI.Account.t()) :: Tuple.t()
-  def update_account(login \\ "my", account = %CloudAPI.Account{}) do
+  @spec update_account(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Account.t()) :: Tuple.t()
+  def update_account(dc = %CloudAPI.Datacenter{}, login \\ "my", account = %CloudAPI.Account{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
     body = Poison.encode! account
-    url = "/" <> login
-    Client.response_as Client.post(url, body), as: %CloudAPI.Config{}
+    url = dc.endpoint <> "/" <> login
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Config{}
   end
 
 
@@ -42,12 +46,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_keys(String.t()) :: Tuple.t()
-  def list_keys(login \\ "my") do
-    url = "/" <> login <> "/keys"
-    Client.response_as Client.get(url), as: [%CloudAPI.Key{}]
+  @spec list_keys(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_keys(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/keys"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Key{}]
   end
 
   @doc """
@@ -55,13 +61,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - name_or_fingerprint: String that is either the Fingerprint of the SSH Key or it's name as it appears in the Cloud Portal.
   """
-  @spec get_key(String.t(), String.t()) :: Tuple.t()
-  def get_key(login \\ "my", name_or_fingerprint) do
-    url = "/" <> login <> "/keys/" <> name_or_fingerprint
-    Client.response_as Client.get(url), as: %CloudAPI.Key{}
+  @spec get_key(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_key(dc = %CloudAPI.Datacenter{}, login \\ "my", name_or_fingerprint) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/keys/" <> name_or_fingerprint
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Key{}
   end
 
   @doc """
@@ -69,14 +77,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - account: %CloudAPI.Key{} with the details you want created.
   """
-  @spec create_key(String.t(), CloudAPI.Key.t()) :: Tuple.t()
-  def create_key(login \\ "my", key = %CloudAPI.Key{}) do
-    url = "/" <> login <> "/keys"
+  @spec create_key(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Key.t()) :: Tuple.t()
+  def create_key(dc = %CloudAPI.Datacenter{}, login \\ "my", key = %CloudAPI.Key{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/keys"
     body = Poison.encode! key
-    Client.response_as Client.post(url, body), as: %CloudAPI.Key{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Key{}
   end
 
   @doc """
@@ -84,13 +94,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - name_or_fingerprint: String that is either the Fingerprint of the SSH Key or it's name as it appears in the Cloud Portal.
   """
-  @spec delete_key(String.t(), String.t()) :: Tuple.t()
-  def delete_key(login \\ "my", name_or_fingerprint) do
-    url = "/" <> login <> "/keys/" <> name_or_fingerprint
-    Client.response_as Client.delete(url)
+  @spec delete_key(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_key(dc = %CloudAPI.Datacenter{}, login \\ "my", name_or_fingerprint) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/keys/" <> name_or_fingerprint
+    Client.response_as Client.delete(url, auth_headers)
   end
 
 
@@ -101,12 +113,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_users(String.t()) :: Tuple.t()
-  def list_users(login \\ "my") do
-    url = "/" <> login <> "/users"
-    Client.response_as Client.get(url), as: [%CloudAPI.Account{}]
+  @spec list_users(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_users(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Account{}]
   end
 
   @doc """
@@ -114,13 +128,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: UUID that represents the ID of the User.
   """
-  @spec get_user(String.t(), String.t()) :: Tuple.t()
-  def get_user(login \\ "my", id) do
-    url = "/" <> login <> "/users/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Account{}
+  @spec get_user(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_user(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Account{}
   end
 
   @doc """
@@ -128,14 +144,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - user: %CloudAPI.Account{} with the details you want created.
   """
-  @spec create_user(String.t(), CloudAPI.Account.t()) :: Tuple.t()
-  def create_user(login \\ "my", user = %CloudAPI.Account{}) do
-    url = "/" <> login <> "/users"
+  @spec create_user(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Account.t()) :: Tuple.t()
+  def create_user(dc = %CloudAPI.Datacenter{}, login \\ "my", user = %CloudAPI.Account{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users"
     body = Poison.encode! user
-    Client.response_as Client.post(url, body), as: %CloudAPI.Account{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Account{}
   end
 
   @doc """
@@ -145,14 +163,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - user: %CloudAPI.Account{} with the details you want created.
   """
-  @spec update_user(String.t(), CloudAPI.Account.t()) :: Tuple.t()
-  def update_user(login \\ "my", user = %CloudAPI.Account{}) do
-    url = "/" <> login <> "/users/" <> user.id
+  @spec update_user(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Account.t()) :: Tuple.t()
+  def update_user(dc = %CloudAPI.Datacenter{}, login \\ "my", user = %CloudAPI.Account{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> user.id
     body = Poison.encode! user
-    Client.response_as Client.post(url, body), as: %CloudAPI.Account{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Account{}
   end
 
   @doc """
@@ -160,18 +180,20 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: UUID that represents the ID of the User.
     - password: String that represents the new password.
   """
-  @spec change_user_password(String.t(), String.t(), String.t()) :: Tuple.t()
-  def change_user_password(login \\ "my", id, password) do
-    url = "/" <> login <> "/users/" <> id <> "/change_password"
+  @spec change_user_password(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def change_user_password(dc = %CloudAPI.Datacenter{}, login \\ "my", id, password) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> id <> "/change_password"
     body = Poison.encode! %{
       password: password,
       password_confirmation: password,
     }
-    Client.response_as Client.post(url, body), as: %CloudAPI.Account{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Account{}
   end
 
   @doc """
@@ -179,13 +201,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: UUID that represents the ID of the User.
   """
-  @spec delete_user(String.t(), String.t()) :: Tuple.t()
-  def delete_user(login \\ "my", id) do
-    url = "/" <> login <> "/users/" <> id
-    Client.response_as Client.delete(url)
+  @spec delete_user(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_user(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
 
@@ -196,12 +220,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_roles(String.t()) :: Tuple.t()
-  def list_roles(login \\ "my") do
-    url = "/" <> login <> "/roles"
-    Client.response_as Client.get(url), as: [%CloudAPI.Role{
+  @spec list_roles(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_roles(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/roles"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Role{
       policies: [%CloudAPI.Role.Policy{}],
       members: [%CloudAPI.Role.Member{}]
     }]
@@ -212,13 +238,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String represents the role id or name.
   """
-  @spec get_role(String.t(), String.t()) :: Tuple.t()
-  def get_role(login \\ "my", id) do
-    url = "/" <> login <> "/roles/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Role{
+  @spec get_role(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_role(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/roles/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Role{
       policies: [%CloudAPI.Role.Policy{}],
       members: [%CloudAPI.Role.Member{}]
     }
@@ -229,14 +257,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - role: %CloudAPI.Role{} with the details you want updated.
   """
-  @spec create_role(String.t(), CloudAPI.Role.t()) :: Tuple.t()
-  def create_role(login \\ "my", role = %CloudAPI.Role{}) do
-    url = "/" <> login <> "/roles"
+  @spec create_role(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Role.t()) :: Tuple.t()
+  def create_role(dc = %CloudAPI.Datacenter{}, login \\ "my", role = %CloudAPI.Role{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/roles"
     body = Poison.encode! role
-    Client.response_as Client.post(url, body), as: %CloudAPI.Role{
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Role{
       policies: [%CloudAPI.Role.Policy{}],
       members: [%CloudAPI.Role.Member{}]
     }
@@ -247,14 +277,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - role: %CloudAPI.Role{} with the details you want updated.
   """
-  @spec update_role(String.t(), CloudAPI.Role.t()) :: Tuple.t()
-  def update_role(login \\ "my", role = %CloudAPI.Role{}) do
-    url = "/" <> login <> "/roles/" <> role.id
+  @spec update_role(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Role.t()) :: Tuple.t()
+  def update_role(dc = %CloudAPI.Datacenter{}, login \\ "my", role = %CloudAPI.Role{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/roles/" <> role.id
     body = Poison.encode! role
-    Client.response_as Client.post(url, body), as: %CloudAPI.Role{
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Role{
       policies: [%CloudAPI.Role.Policy{}],
       members: [%CloudAPI.Role.Member{}]
     }
@@ -265,13 +297,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - role: %CloudAPI.Role{} with the details you want updated.
   """
-  @spec delete_role(String.t(), String.t()) :: Tuple.t()
-  def delete_role(login \\ "my", id) do
-    url = "/" <> login <> "/roles/" <> id
-    Client.response_as Client.delete(url)
+  @spec delete_role(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_role(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/roles/" <> id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
 
@@ -282,12 +316,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_policies(String.t()) :: Tuple.t()
-  def list_policies(login \\ "my") do
-    url = "/" <> login <> "/policies"
-    Client.response_as Client.get(url), as: [%CloudAPI.Policy{}]
+  @spec list_policies(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_policies(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/policies"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Policy{}]
   end
 
   @doc """
@@ -295,13 +331,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the policy id.
   """
-  @spec get_policy(String.t(), String.t()) :: Tuple.t()
-  def get_policy(login \\ "my", id) do
-    url = "/" <> login <> "/policies/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Policy{}
+  @spec get_policy(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_policy(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/policies/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Policy{}
   end
 
   @doc """
@@ -309,14 +347,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - policy: %CloudAPI.Policy{} with the details you want updated.
   """
-  @spec create_policy(String.t(), CloudAPI.Policy.t()) :: Tuple.t()
-  def create_policy(login \\ "my", policy = %CloudAPI.Policy{}) do
-    url = "/" <> login <> "/policies"
+  @spec create_policy(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Policy.t()) :: Tuple.t()
+  def create_policy(dc = %CloudAPI.Datacenter{}, login \\ "my", policy = %CloudAPI.Policy{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/policies"
     body = Poison.encode! policy
-    Client.response_as Client.post(url, body), as: %CloudAPI.Policy{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Policy{}
   end
 
   @doc """
@@ -324,14 +364,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - policy: %CloudAPI.Policy{} with the details you want updated.
   """
-  @spec update_policy(String.t(), CloudAPI.Policy.t()) :: Tuple.t()
-  def update_policy(login \\ "my", policy = %CloudAPI.Policy{}) do
-    url = "/" <> login <> "/policies/" <> policy.id
+  @spec update_policy(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Policy.t()) :: Tuple.t()
+  def update_policy(dc = %CloudAPI.Datacenter{}, login \\ "my", policy = %CloudAPI.Policy{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/policies/" <> policy.id
     body = Poison.encode! policy
-    Client.response_as Client.post(url, body), as: %CloudAPI.Policy{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Policy{}
   end
 
   @doc """
@@ -339,13 +381,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the policy id.
   """
-  @spec delete_policy(String.t(), String.t()) :: Tuple.t()
-  def delete_policy(login \\ "my", id) do
-    url = "/" <> login <> "/policies/" <> id
-    Client.response_as Client.delete(url)
+  @spec delete_policy(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_policy(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/policies/" <> id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
 
@@ -356,13 +400,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - user: String that represents the users id or name.
   """
-  @spec update_account(String.t(), String.t()) :: Tuple.t()
-  def list_user_keys(login \\ "my", user) do
-    url = "/" <> login <> "/users/" <> user <> "/keys"
-    Client.response_as Client.get(url), as: [%CloudAPI.Key{}]
+  @spec update_account(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_user_keys(dc = %CloudAPI.Datacenter{}, login \\ "my", user) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> user <> "/keys"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Key{}]
   end
 
   @doc """
@@ -370,14 +416,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - user: String that represents the users id or name.
     - name_or_fingerprint: String that represents the SSH Key's name or fingerprint.
   """
-  @spec get_user_key(String.t(), String.t(), String.t()) :: Tuple.t()
-  def get_user_key(login \\ "my", user, name_or_fingerprint) do
-    url = "/" <> login <> "/users/" <> user <> "/keys/" <> name_or_fingerprint
-    Client.response_as Client.get(url), as: %CloudAPI.Key{}
+  @spec get_user_key(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def get_user_key(dc = %CloudAPI.Datacenter{}, login \\ "my", user, name_or_fingerprint) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> user <> "/keys/" <> name_or_fingerprint
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Key{}
   end
 
   @doc """
@@ -385,15 +433,17 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - user: String that represents the users id or name.
     - key: %CloudAPI.Key{} with the details you want updated.
   """
-  @spec create_user_key(String.t(), String.t(), CloudAPI.Key.t()) :: Tuple.t()
-  def create_user_key(login \\ "my", user, key = %CloudAPI.Key{}) do
-    url = "/" <> login <> "/users/" <> user <> "/keys"
+  @spec create_user_key(CloudAPI.Datacenter.t(), String.t(), String.t(), CloudAPI.Key.t()) :: Tuple.t()
+  def create_user_key(dc = %CloudAPI.Datacenter{}, login \\ "my", user, key = %CloudAPI.Key{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> user <> "/keys"
     body = Poison.encode! key
-    Client.response_as Client.post(url, body), as: %CloudAPI.Key{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Key{}
   end
 
   @doc """
@@ -401,14 +451,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - user: String that represents the users id or name.
     - name_or_fingerprint: String that represents the SSH Key's name or fingerprint.
   """
-  @spec delete_user_key(String.t(), String.t(), String.t()) :: Tuple.t()
-  def delete_user_key(login \\ "my", user, name_or_fingerprint) do
-    url = "/" <> login <> "/users/" <> user <> "/keys/" <> name_or_fingerprint
-    Client.response_as Client.delete(url)
+  @spec delete_user_key(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_user_key(dc = %CloudAPI.Datacenter{}, login \\ "my", user, name_or_fingerprint) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/users/" <> user <> "/keys/" <> name_or_fingerprint
+    Client.response_as Client.delete(url, auth_headers)
   end
 
 
@@ -419,12 +471,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec get_config(String.t()) :: Tuple.t()
-  def get_config(login \\ "my") do
-    url = "/" <> login <> "/config"
-    Client.response_as Client.get(url), as: %CloudAPI.Config{}
+  @spec get_config(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def get_config(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/config"
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Config{}
   end
 
   @doc """
@@ -432,14 +486,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - config: %CloudAPI.Config{} with the details you want updated.
   """
-  @spec update_config(String.t(), CloudAPI.Config.t()) :: Tuple.t()
-  def update_config(login \\ "my", config = %CloudAPI.Config{}) do
+  @spec update_config(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Config.t()) :: Tuple.t()
+  def update_config(dc = %CloudAPI.Datacenter{}, login \\ "my", config = %CloudAPI.Config{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
     body = Poison.encode! config
-    url = "/" <> login <> "/config"
-    Client.response_as Client.post(url, body), as: %CloudAPI.Config{}
+    url = dc.endpoint <> "/" <> login <> "/config"
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Config{}
   end
 
 
@@ -449,9 +505,10 @@ defmodule CloudAPI do
   Lists all available Datacenters and their endpoints.
 
   """
-  @spec list_datacenters() :: Map.t()
-  def list_datacenters() do
-    Client.response_as Client.get("/my/datacenters")
+  @spec list_datacenters(CloudAPI.Datacenter.t()) :: Map.t()
+  def list_datacenters(dc = %CloudAPI.Datacenter{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    Client.response_as Client.get("/my/datacenters", auth_headers)
   end
 
 
@@ -461,9 +518,10 @@ defmodule CloudAPI do
   Lists all available services like Manta.
 
   """
-  @spec list_services() :: Tuple.t()
-  def list_services() do
-    Client.response_as Client.get("/my/services")
+  @spec list_services(CloudAPI.Datacenter.t()) :: Tuple.t()
+  def list_services(dc = %CloudAPI.Datacenter{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    Client.response_as Client.get("/my/services", auth_headers)
   end
 
 
@@ -474,12 +532,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_images(String.t()) :: Tuple.t()
-  def list_images(login \\ "my") do
-    url = "/" <> login <> "/images"
-    Client.response_as Client.get(url), as: [%CloudAPI.Image{
+  @spec list_images(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_images(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Image{
       requirements: %CloudAPI.Image.Requirements{},
       files: [%CloudAPI.Image.File{}]
     }]
@@ -490,13 +550,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String represents the image id.
   """
-  @spec get_image(String.t(), String.t()) :: Tuple.t()
-  def get_image(login \\ "my", id) do
-    url = "/" <> login <> "/images/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Image{
+  @spec get_image(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_image(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Image{
       requirements: %CloudAPI.Image.Requirements{},
       files: [%CloudAPI.Image.File{}]
     }
@@ -507,13 +569,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String represents the image id.
   """
-  @spec delete_image(String.t(), String.t()) :: Tuple.t()
-  def delete_image(login \\ "my", id) do
-    url = "/" <> login <> "/images/" <> id
-    Client.response_as Client.delete(url)
+  @spec delete_image(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_image(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images/" <> id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
   @doc """
@@ -521,14 +585,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String represents the image id.
     - manta_path: String represents the Manta's URL.
   """
-  @spec export_image(String.t(), String.t(), String.t()) :: Tuple.t()
-  def export_image(login \\ "my", id, manta_path) do
-    url = "/" <> login <> "/images/" <> id <> "?action=export&manta_path=" <> manta_path
-    Client.response_as Client.post(url, nil)
+  @spec export_image(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def export_image(dc = %CloudAPI.Datacenter{}, login \\ "my", id, manta_path) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images/" <> id <> "?action=export&manta_path=" <> manta_path
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -536,14 +602,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - create_image: %CloudAPI.CreateImageFromMachine{} with the details you want updated.
   """
-  @spec create_image_from_machine(String.t(), CloudAPI.CloudAPI.CreateImageFromMachine.t()) :: Tuple.t()
-  def create_image_from_machine(login \\ "my", create_image = %CloudAPI.CreateImageFromMachine{}) do
-    url = "/" <> login <> "/images"
+  @spec create_image_from_machine(CloudAPI.Datacenter.t(), String.t(), CloudAPI.CloudAPI.CreateImageFromMachine.t()) :: Tuple.t()
+  def create_image_from_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", create_image = %CloudAPI.CreateImageFromMachine{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images"
     body = Poison.encode! create_image
-    Client.response_as Client.post(url, body)
+    Client.response_as Client.post(url, body, auth_headers)
   end
 
   @doc """
@@ -553,14 +621,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - datacenter: String that represents the Datacenter.
     - id: String that represents the image id to copy.
   """
-  @spec import_image_from_datacenter(String.t(), String.t(), String.t()) :: Tuple.t()
-  def import_image_from_datacenter(login \\ "my", datacenter, id) do
-    url = "/" <> login <> "/images?action=import-from-datacenter&datacenter=" <> datacenter <> "&id=" <> id
-    Client.response_as Client.post(url, nil), as: %CloudAPI.Image{
+  @spec import_image_from_datacenter(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def import_image_from_datacenter(dc = %CloudAPI.Datacenter{}, login \\ "my", datacenter, id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images?action=import-from-datacenter&datacenter=" <> datacenter <> "&id=" <> id
+    Client.response_as Client.post(url, nil, auth_headers), as: %CloudAPI.Image{
       requirements: %CloudAPI.Image.Requirements{},
       files: [%CloudAPI.Image.File{}]
     }
@@ -571,14 +641,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - image: %CloudAPI.Image{} with the details you want updated.
   """
-  @spec update_image(String.t(), CloudAPI.Image.t()) :: Tuple.t()
-  def update_image(login \\ "my", image = %CloudAPI.Image{}) do
-    url = "/" <> login <> "/images/" <> image.id <> "?action=update"
+  @spec update_image(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Image.t()) :: Tuple.t()
+  def update_image(dc = %CloudAPI.Datacenter{}, login \\ "my", image = %CloudAPI.Image{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images/" <> image.id <> "?action=update"
     body = Poison.encode! image
-    Client.response_as Client.post(url, body), as: %CloudAPI.Image{
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Image{
       requirements: %CloudAPI.Image.Requirements{},
       files: [%CloudAPI.Image.File{}]
     }
@@ -593,13 +665,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the image id to clone.
   """
-  @spec clone_image(String.t(), String.t()) :: Tuple.t()
-  def clone_image(login \\ "my", id) do
-    url = "/" <> login <> "/images/" <> id <> "?action=clone"
-    Client.response_as Client.post(url, nil), as: %CloudAPI.Image{
+  @spec clone_image(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def clone_image(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/images/" <> id <> "?action=clone"
+    Client.response_as Client.post(url, nil, auth_headers), as: %CloudAPI.Image{
       requirements: %CloudAPI.Image.Requirements{},
       files: [%CloudAPI.Image.File{}]
     }
@@ -613,12 +687,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_packages(String.t()) :: Tuple.t()
-  def list_packages(login \\ "my") do
-    url = "/" <> login <> "/packages"
-    Client.response_as Client.get(url), as: [%CloudAPI.Package{}]
+  @spec list_packages(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_packages(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/packages"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Package{}]
   end
 
   @doc """
@@ -626,13 +702,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the package's id or name.
   """
-  @spec get_package(String.t(), String.t()) :: Tuple.t()
-  def get_package(login \\ "my", id) do
-    url = "/" <> login <> "/packages/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Package{}
+  @spec get_package(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_package(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/packages/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Package{}
   end
 
 
@@ -643,12 +721,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_machines(String.t()) :: Tuple.t()
-  def list_machines(login \\ "my") do
-    url = "/" <> login <> "/machines"
-    Client.response_as Client.get(url), as: [%CloudAPI.Machine{}]
+  @spec list_machines(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_machines(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Machine{}]
   end
 
   @doc """
@@ -658,13 +738,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the machine id.
   """
-  @spec get_machine(String.t(), String.t()) :: Tuple.t()
-  def get_machine(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Machine{}
+  @spec get_machine(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Machine{}
   end
 
   @doc """
@@ -698,14 +780,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - machine: %CloudAPI.CreateMachine{} with the details you want updated.
   """
-  @spec create_machine(String.t(), CloudAPI.CreateMachine.t()) :: Tuple.t()
-  def create_machine(login \\ "my", machine = %CloudAPI.CreateMachine{}) do
-    url = "/" <> login <> "/machines"
+  @spec create_machine(CloudAPI.Datacenter.t(), String.t(), CloudAPI.CreateMachine.t()) :: Tuple.t()
+  def create_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", machine = %CloudAPI.CreateMachine{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines"
     body = Poison.encode! machine
-    Client.response_as Client.post(url, body), as: %CloudAPI.Machine{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Machine{}
   end
 
   @doc """
@@ -713,13 +797,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine to be deleted.
   """
-  @spec delete_machine(String.t(), String.t()) :: Tuple.t()
-  def delete_machine(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <>  id
-    Client.response_as Client.delete(url)
+  @spec delete_machine(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <>  id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
   @doc """
@@ -729,13 +815,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec stop_machine(String.t(), String.t()) :: Tuple.t()
-  def stop_machine(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=stop"
-    Client.response_as Client.post(url, nil)
+  @spec stop_machine(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def stop_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=stop"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -745,13 +833,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec start_machine(String.t(), String.t()) :: Tuple.t()
-  def start_machine(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=start"
-    Client.response_as Client.post(url, nil)
+  @spec start_machine(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def start_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=start"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -761,13 +851,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec reboot_machine(String.t(), String.t()) :: Tuple.t()
-  def reboot_machine(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=reboot"
-    Client.response_as Client.post(url, nil)
+  @spec reboot_machine(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def reboot_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=reboot"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -777,18 +869,20 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - package_id: String that represents the id of the target package.
   """
-  @spec resize_machine(String.t(), String.t(), String.t()) :: Tuple.t()
-  def resize_machine(login \\ "my", id, package_id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=resize"
+  @spec resize_machine(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def resize_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id, package_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=resize"
     body = Poison.encode! %{
       action: "resize",
       package: package_id
     }
-    Client.response_as Client.post(url, body)
+    Client.response_as Client.post(url, body, auth_headers)
   end
 
   @doc """
@@ -796,18 +890,20 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - name: String that represents the new name of the machine.
   """
-  @spec rename_machine(String.t(), String.t(), String.t()) :: Tuple.t()
-  def rename_machine(login \\ "my", id, name) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=resize"
+  @spec rename_machine(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def rename_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=resize"
     body = Poison.encode! %{
       action: "resize",
       name: name
     }
-    Client.response_as Client.post(url, body)
+    Client.response_as Client.post(url, body, auth_headers)
   end
 
   @doc """
@@ -815,13 +911,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec enable_machine_firewall(String.t(), String.t()) :: Tuple.t()
-  def enable_machine_firewall(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=enable_firewall"
-    Client.response_as Client.post(url, nil)
+  @spec enable_machine_firewall(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def enable_machine_firewall(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=enable_firewall"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -829,13 +927,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec disable_machine_firewall(String.t(), String.t()) :: Tuple.t()
-  def disable_machine_firewall(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=disable_firewall"
-    Client.response_as Client.post(url, nil)
+  @spec disable_machine_firewall(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def disable_machine_firewall(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=disable_firewall"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -843,13 +943,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec enable_machine_deletion_protection(String.t(), String.t()) :: Tuple.t()
-  def enable_machine_deletion_protection(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=enable_deletion_protection"
-    Client.response_as Client.post(url, nil)
+  @spec enable_machine_deletion_protection(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def enable_machine_deletion_protection(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=enable_deletion_protection"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -857,13 +959,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec disable_machine_deletion_protection(String.t(), String.t()) :: Tuple.t()
-  def disable_machine_deletion_protection(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "?action=disable_deletion_protection"
-    Client.response_as Client.post(url, nil)
+  @spec disable_machine_deletion_protection(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def disable_machine_deletion_protection(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=disable_deletion_protection"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -877,17 +981,19 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - name: String that represents the name of the snapshot.
   """
-  @spec create_machine_snapshot(String.t(), String.t(), String.t()) :: Tuple.t()
-  def create_machine_snapshot(login \\ "my", id, name) do
-    url = "/" <> login <> "/machines/" <> id <> "/snapshots"
+  @spec create_machine_snapshot(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def create_machine_snapshot(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/snapshots"
     body = Poison.encode! %{
       name: name
     }
-    Client.response_as Client.post(url, body)
+    Client.response_as Client.post(url, body, auth_headers)
   end
 
   @doc """
@@ -895,14 +1001,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - name: String that represents the name of the snapshot.
   """
-  @spec start_machine_from_snapshot(String.t(), String.t(), String.t()) :: Tuple.t()
-  def start_machine_from_snapshot(login \\ "my", id, name) do
-    url = "/" <> login <> "/machines/" <> id <> "/snapshots/" <> name
-    Client.response_as Client.post(url, nil)
+  @spec start_machine_from_snapshot(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def start_machine_from_snapshot(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/snapshots/" <> name
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -910,13 +1018,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec list_machine_snapshots(String.t(), String.t()) :: Tuple.t()
-  def list_machine_snapshots(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "/snapshots"
-    Client.response_as Client.get(url), as: [%CloudAPI.Machine.Snapshot{}]
+  @spec list_machine_snapshots(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_machine_snapshots(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/snapshots"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Machine.Snapshot{}]
   end
 
   @doc """
@@ -924,14 +1034,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - name: String that represents the name of the snapshot.
   """
-  @spec get_machine_snapshot(String.t(), String.t(), String.t()) :: Tuple.t()
-  def get_machine_snapshot(login \\ "my", id, name) do
-    url = "/" <> login <> "/machines/" <> id <> "/snapshots/" <> name
-    Client.response_as Client.get(url), as: %CloudAPI.Machine{}
+  @spec get_machine_snapshot(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def get_machine_snapshot(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/snapshots/" <> name
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Machine{}
   end
 
   @doc """
@@ -939,14 +1051,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - name: String that represents the name of the snapshot.
   """
-  @spec delete_machine_snapshot(String.t(), String.t(), String.t()) :: Tuple.t()
-  def delete_machine_snapshot(login \\ "my", id, name) do
-    url = "/" <> login <> "/machines/" <>  id <> "/snapshots/" <> name
-    Client.response_as Client.delete(url)
+  @spec delete_machine_snapshot(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_machine_snapshot(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <>  id <> "/snapshots/" <> name
+    Client.response_as Client.delete(url, auth_headers)
   end
 
   # TODO CreateMachineDisk (bhyve)
@@ -962,15 +1076,17 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - metadata: Map of Key-Value to store as metadata.
   """
-  @spec update_machine_metadata(String.t(), String.t(), Map.t()) :: Tuple.t()
-  def update_machine_metadata(login \\ "my", id, metadata = %{}) do
-    url = "/" <> login <> "/machines/" <> id <> "/metadata"
+  @spec update_machine_metadata(CloudAPI.Datacenter.t(), String.t(), String.t(), Map.t()) :: Tuple.t()
+  def update_machine_metadata(dc = %CloudAPI.Datacenter{}, login \\ "my", id, metadata = %{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/metadata"
     body = Poison.encode! metadata
-    Client.response_as Client.post(url, body)
+    Client.response_as Client.post(url, body, auth_headers)
   end
 
   @doc """
@@ -978,14 +1094,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - credentials: Boolean that represents if the API should return credentials stored in metadata.
   """
-  @spec list_machine_metadata(String.t(), String.t(), Boolean.t()) :: Tuple.t()
-  def list_machine_metadata(login \\ "my", id, credentials \\ false) when is_boolean(credentials) do
-    url = "/" <> login <> "/machines/" <> id <> "/metadata?credentials=" <> credentials
-    Client.response_as Client.get(url, nil)
+  @spec list_machine_metadata(CloudAPI.Datacenter.t(), String.t(), String.t(), Boolean.t()) :: Tuple.t()
+  def list_machine_metadata(dc = %CloudAPI.Datacenter{}, login \\ "my", id, credentials \\ false) when is_boolean(credentials) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/metadata?credentials=" <> credentials
+    Client.response_as Client.get(url, nil, auth_headers)
   end
 
   @doc """
@@ -993,14 +1111,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - key: String that represents the metadata key.
   """
-  @spec get_machine_metadata(String.t(), String.t(), String.t()) :: Tuple.t()
-  def get_machine_metadata(login \\ "my", id, key) do
-    url = "/" <> login <> "/machines/" <> id <> "/metadata/" <> key
-    Client.response_as Client.get(url, nil)
+  @spec get_machine_metadata(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def get_machine_metadata(dc = %CloudAPI.Datacenter{}, login \\ "my", id, key) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/metadata/" <> key
+    Client.response_as Client.get(url, nil, auth_headers)
   end
 
   @doc """
@@ -1008,14 +1128,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - key: String that represents the metadata key.
   """
-  @spec delete_machine_metadata(String.t(), String.t(), String.t()) :: Tuple.t()
-  def delete_machine_metadata(login \\ "my", id, key) do
-    url = "/" <> login <> "/machines/" <> id <> "/metadata/" <> key
-    Client.response_as Client.delete(url, nil)
+  @spec delete_machine_metadata(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_machine_metadata(dc = %CloudAPI.Datacenter{}, login \\ "my", id, key) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/metadata/" <> key
+    Client.response_as Client.delete(url, nil, auth_headers)
   end
 
   @doc """
@@ -1023,13 +1145,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec delete_all_machine_metadata(String.t(), String.t()) :: Tuple.t()
-  def delete_all_machine_metadata(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "/metadata"
-    Client.response_as Client.delete(url, nil)
+  @spec delete_all_machine_metadata(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_all_machine_metadata(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/metadata"
+    Client.response_as Client.delete(url, nil, auth_headers)
   end
 
   @doc """
@@ -1037,15 +1161,17 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - tags: Map of Key-Value assignment of tags.
   """
-  @spec add_machine_tags(String.t(), String.t(), Map.t()) :: Tuple.t()
-  def add_machine_tags(login \\ "my", id, tags = %{}) do
-    url = "/" <> login <> "/machines/" <> id <> "/tags"
+  @spec add_machine_tags(CloudAPI.Datacenter.t(), String.t(), String.t(), Map.t()) :: Tuple.t()
+  def add_machine_tags(dc = %CloudAPI.Datacenter{}, login \\ "my", id, tags = %{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags"
     body = Poison.encode! tags
-    Client.response_as Client.post(url, body)
+    Client.response_as Client.post(url, body, auth_headers)
   end
 
   @doc """
@@ -1053,15 +1179,17 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - tags: Map of Key-Value assignment of tags.
   """
-  @spec replace_machine_tags(String.t(), String.t(), Map.t()) :: Tuple.t()
-  def replace_machine_tags(login \\ "my", id, tags = %{}) do
-    url = "/" <> login <> "/machines/" <> id <> "/tags"
+  @spec replace_machine_tags(CloudAPI.Datacenter.t(), String.t(), String.t(), Map.t()) :: Tuple.t()
+  def replace_machine_tags(dc = %CloudAPI.Datacenter{}, login \\ "my", id, tags = %{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags"
     body = Poison.encode! tags
-    Client.response_as Client.put(url, body)
+    Client.response_as Client.put(url, body, auth_headers)
   end
 
   @doc """
@@ -1069,13 +1197,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec list_machine_tags(String.t(), String.t()) :: Tuple.t()
-  def list_machine_tags(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "/tags"
-    Client.response_as Client.get(url, nil)
+  @spec list_machine_tags(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_machine_tags(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags"
+    Client.response_as Client.get(url, nil, auth_headers)
   end
 
   @doc """
@@ -1083,14 +1213,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - tag: String that represents the tag name.
   """
-  @spec get_machine_tag(String.t(), String.t(), String.t()) :: Tuple.t()
-  def get_machine_tag(login \\ "my", id, tag) do
-    url = "/" <> login <> "/machines/" <> id <> "/tags/" <> tag
-    Client.response_as Client.get(url, nil)
+  @spec get_machine_tag(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def get_machine_tag(dc = %CloudAPI.Datacenter{}, login \\ "my", id, tag) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags/" <> tag
+    Client.response_as Client.get(url, nil, auth_headers)
   end
 
   @doc """
@@ -1098,14 +1230,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
     - tag: String that represents the tag name.
   """
-  @spec delete_machine_tag(String.t(), String.t(), String.t()) :: Tuple.t()
-  def delete_machine_tag(login \\ "my", id, tag) do
-    url = "/" <> login <> "/machines/" <> id <> "/tags/" <> tag
-    Client.response_as Client.delete(url, nil)
+  @spec delete_machine_tag(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_machine_tag(dc = %CloudAPI.Datacenter{}, login \\ "my", id, tag) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags/" <> tag
+    Client.response_as Client.delete(url, nil, auth_headers)
   end
 
   @doc """
@@ -1113,13 +1247,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec delete_all_machine_tags(String.t(), String.t()) :: Tuple.t()
-  def delete_all_machine_tags(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "/tags"
-    Client.response_as Client.delete(url, nil)
+  @spec delete_all_machine_tags(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_all_machine_tags(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags"
+    Client.response_as Client.delete(url, nil, auth_headers)
   end
 
   @doc """
@@ -1129,13 +1265,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the machine.
   """
-  @spec machine_audit(String.t(), String.t()) :: Tuple.t()
-  def machine_audit(login \\ "my", id) do
-    url = "/" <> login <> "/machines/" <> id <> "/audit"
-    Client.response_as Client.get(url, nil)
+  @spec machine_audit(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def machine_audit(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/audit"
+    Client.response_as Client.get(url, nil, auth_headers)
   end
 
 
@@ -1156,12 +1294,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_migrations(String.t()) :: Tuple.t()
-  def list_migrations(login \\ "my") do
-    url = "/" <> login <> "/migrations"
-    Client.response_as Client.get(url), as: [%CloudAPI.Migration{}]
+  @spec list_migrations(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_migrations(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/migrations"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Migration{}]
   end
 
   @doc """
@@ -1169,13 +1309,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the migration.
   """
-  @spec get_migration(String.t(), String.t()) :: Tuple.t()
-  def get_migration(login \\ "my", id) do
-    url = "/" <> login <> "/migrations/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Migration{}
+  @spec get_migration(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_migration(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/migrations/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Migration{}
   end
 
   @doc """
@@ -1183,19 +1325,21 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the migration.
     - action: String that represents the action to take, usually begin or watch.
     - affinity: Array that represents the affinity rules. Only applies when actions are begin or automatic.
   """
-  @spec migrate(String.t(), String.t(), String.t(), Array.t()) :: Tuple.t()
-  def migrate(login \\ "my", id, action, affinity \\ []) do
-    url = "/" <> login <> "/machines/" <> id <> "/migrate"
+  @spec migrate(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t(), Array.t()) :: Tuple.t()
+  def migrate(dc = %CloudAPI.Datacenter{}, login \\ "my", id, action, affinity \\ []) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/migrate"
     body = Poison.encode! %{
       action: action,
       affinity: affinity
     }
-    Client.response_as Client.post(url, body), as: %CloudAPI.Migration{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Migration{}
   end
 
 
@@ -1206,12 +1350,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_firewall_rules(String.t()) :: Tuple.t()
-  def list_firewall_rules(login \\ "my") do
-    url = "/" <> login <> "/fwrules"
-    Client.response_as Client.get(url), as: [%CloudAPI.FirewallRule{}]
+  @spec list_firewall_rules(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_firewall_rules(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.FirewallRule{}]
   end
 
   @doc """
@@ -1219,13 +1365,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the Firewall Rule id.
   """
-  @spec get_firewall_rule(String.t(), String.t()) :: Tuple.t()
-  def get_firewall_rule(login \\ "my", id) do
-    url = "/" <> login <> "/fwrules/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.FirewallRule{}
+  @spec get_firewall_rule(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.FirewallRule{}
   end
 
   @doc """
@@ -1233,14 +1381,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - fwrule: %CloudAPI.FirewallRule{} with the details you want updated.
   """
-  @spec create_firewall_rule(String.t(), CloudAPI.FirewallRule.t()) :: Tuple.t()
-  def create_firewall_rule(login \\ "my", fwrule = %CloudAPI.FirewallRule{}) do
-    url = "/" <> login <> "/fwrules"
+  @spec create_firewall_rule(CloudAPI.Datacenter.t(), String.t(), CloudAPI.FirewallRule.t()) :: Tuple.t()
+  def create_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", fwrule = %CloudAPI.FirewallRule{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules"
     body = Poison.encode! fwrule
-    Client.response_as Client.post(url, body), as: %CloudAPI.FirewallRule{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.FirewallRule{}
   end
 
   @doc """
@@ -1248,14 +1398,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - fwrule: %CloudAPI.FirewallRule{} with the details you want updated.
   """
-  @spec update_firewall_rule(String.t(), CloudAPI.FirewallRule.t()) :: Tuple.t()
-  def update_firewall_rule(login \\ "my", fwrule = %CloudAPI.FirewallRule{}) do
-    url = "/" <> login <> "/fwrules/" <> fwrule.id
+  @spec update_firewall_rule(CloudAPI.Datacenter.t(), String.t(), CloudAPI.FirewallRule.t()) :: Tuple.t()
+  def update_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", fwrule = %CloudAPI.FirewallRule{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules/" <> fwrule.id
     body = Poison.encode! fwrule
-    Client.response_as Client.post(url, body), as: %CloudAPI.FirewallRule{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.FirewallRule{}
   end
 
   @doc """
@@ -1263,13 +1415,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the Firewall Rule.
   """
-  @spec enable_firewall_rule(String.t(), String.t()) :: Tuple.t()
-  def enable_firewall_rule(login \\ "my", id) do
-    url = "/" <> login <> "/fwrules/" <>  id <> "/enable"
-    Client.response_as Client.post(url, nil)
+  @spec enable_firewall_rule(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def enable_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules/" <>  id <> "/enable"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -1277,13 +1431,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the Firewall Rule.
   """
-  @spec disable_firewall_rule(String.t(), String.t()) :: Tuple.t()
-  def disable_firewall_rule(login \\ "my", id) do
-    url = "/" <> login <> "/fwrules/" <>  id <> "/disable"
-    Client.response_as Client.post(url, nil)
+  @spec disable_firewall_rule(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def disable_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules/" <>  id <> "/disable"
+    Client.response_as Client.post(url, nil, auth_headers)
   end
 
   @doc """
@@ -1291,13 +1447,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the id of the Firewall Rule.
   """
-  @spec delete_firewall_rule(String.t(), String.t()) :: Tuple.t()
-  def delete_firewall_rule(login \\ "my", id) do
-    url = "/" <> login <> "/fwrules/" <>  id
-    Client.response_as Client.delete(url)
+  @spec delete_firewall_rule(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules/" <>  id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
   @doc """
@@ -1305,13 +1463,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - machine_id: String that represents the machine id.
   """
-  @spec list_machine_firewall_rules(String.t(), String.t()) :: Tuple.t()
-  def list_machine_firewall_rules(login \\ "my", machine_id) do
-    url = "/" <> login <> "/machines/" <> machine_id <> "/fwrules"
-    Client.response_as Client.get(url), as: [%CloudAPI.FirewallRule{}]
+  @spec list_machine_firewall_rules(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_machine_firewall_rules(dc = %CloudAPI.Datacenter{}, login \\ "my", machine_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> machine_id <> "/fwrules"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.FirewallRule{}]
   end
 
   @doc """
@@ -1319,13 +1479,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - rule_id: String that represents the Firewall Rule id.
   """
-  @spec list_firewall_rules_machines(String.t(), String.t()) :: Tuple.t()
-  def list_firewall_rules_machines(login \\ "my", rule_id) do
-    url = "/" <> login <> "/fwrules/" <> rule_id <> "/machines"
-    Client.response_as Client.get(url), as: [%CloudAPI.Machine{}]
+  @spec list_firewall_rules_machines(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_firewall_rules_machines(dc = %CloudAPI.Datacenter{}, login \\ "my", rule_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fwrules/" <> rule_id <> "/machines"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Machine{}]
   end
 
 
@@ -1342,12 +1504,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_fabric_vlans(String.t()) :: Tuple.t()
-  def list_fabric_vlans(login \\ "my") do
-    url = "/" <> login <> "/fabrics/default/vlans"
-    Client.response_as Client.get(url), as: [%CloudAPI.VLAN{}]
+  @spec list_fabric_vlans(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_fabric_vlans(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.VLAN{}]
   end
 
   @doc """
@@ -1355,13 +1519,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the VLAN id.
   """
-  @spec get_fabric_vlan(String.t(), String.t()) :: Tuple.t()
-  def get_fabric_vlan(login \\ "my", id) do
-    url = "/" <> login <> "/fabrics/default/vlan/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.VLAN{}
+  @spec get_fabric_vlan(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_fabric_vlan(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlan/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.VLAN{}
   end
 
   @doc """
@@ -1369,14 +1535,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the VLAN id.
   """
-  @spec create_fabric_vlan(String.t(), String.t()) :: Tuple.t()
-  def create_fabric_vlan(login \\ "my", vlan = %CloudAPI.VLAN{}) do
-    url = "/" <> login <> "/fabrics/default/vlan"
+  @spec create_fabric_vlan(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def create_fabric_vlan(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan = %CloudAPI.VLAN{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlan"
     body = Poison.encode! vlan
-    Client.response_as Client.post(url, body), as: %CloudAPI.VLAN{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.VLAN{}
   end
 
   @doc """
@@ -1384,14 +1552,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - vlan: %CloudAPI.VLAN{} with the details you want updated.
   """
-  @spec update_fabric_vlan(String.t(), CloudAPI.VLAN.t()) :: Tuple.t()
-  def update_fabric_vlan(login \\ "my", vlan = %CloudAPI.VLAN{}) do
-    url = "/" <> login <> "/fabrics/default/vlan/" <> vlan.id
+  @spec update_fabric_vlan(CloudAPI.Datacenter.t(), String.t(), CloudAPI.VLAN.t()) :: Tuple.t()
+  def update_fabric_vlan(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan = %CloudAPI.VLAN{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlan/" <> vlan.id
     body = Poison.encode! vlan
-    Client.response_as Client.post(url, body), as: %CloudAPI.VLAN{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.VLAN{}
   end
 
   @doc """
@@ -1399,13 +1569,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the VLAN id.
   """
-  @spec delete_fabric_vlan(String.t(), String.t()) :: Tuple.t()
-  def delete_fabric_vlan(login \\ "my", id) do
-    url = "/" <> login <> "/fabrics/default/vlans/" <>  id
-    Client.response_as Client.delete(url)
+  @spec delete_fabric_vlan(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_fabric_vlan(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <>  id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
   @doc """
@@ -1413,13 +1585,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the VLAN id.
   """
-  @spec list_fabric_networks(String.t(), String.t()) :: Tuple.t()
-  def list_fabric_networks(login \\ "my", vlan_id) do
-    url = "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks"
-    Client.response_as Client.get(url), as: [%CloudAPI.Network{}]
+  @spec list_fabric_networks(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_fabric_networks(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Network{}]
   end
 
   @doc """
@@ -1427,14 +1601,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - vlan_id: String that represents the VLAN id.
     - id: String that represents the Network id.
   """
-  @spec get_fabric_network(String.t(), String.t(), String.t()) :: Tuple.t()
-  def get_fabric_network(login \\ "my", vlan_id, id) do
-    url = "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Network{}
+  @spec get_fabric_network(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def get_fabric_network(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan_id, id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Network{}
   end
 
   @doc """
@@ -1442,15 +1618,17 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - vlan_id: String that represents the VLAN id.
     - network: %CloudAPI.Network{} with the details you want updated.
   """
-  @spec create_fabric_network(String.t(), String.t(), CloudAPI.Network.t()) :: Tuple.t()
-  def create_fabric_network(login \\ "my", vlan_id, network = %CloudAPI.Network{}) do
-    url = "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks"
+  @spec create_fabric_network(CloudAPI.Datacenter.t(), String.t(), String.t(), CloudAPI.Network.t()) :: Tuple.t()
+  def create_fabric_network(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan_id, network = %CloudAPI.Network{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks"
     body = Poison.encode! network
-    Client.response_as Client.post(url, body), as: %CloudAPI.Network{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Network{}
   end
 
   @doc """
@@ -1458,15 +1636,17 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - vlan_id: String that represents the VLAN id.
     - network: %CloudAPI.Network{} with the details you want updated.
   """
-  @spec update_fabric_network(String.t(), String.t(), CloudAPI.Network.t()) :: Tuple.t()
-  def update_fabric_network(login \\ "my", vlan_id, network = %CloudAPI.Network{}) do
-    url = "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks/" <> network.id
+  @spec update_fabric_network(CloudAPI.Datacenter.t(), String.t(), String.t(), CloudAPI.Network.t()) :: Tuple.t()
+  def update_fabric_network(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan_id, network = %CloudAPI.Network{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks/" <> network.id
     body = Poison.encode! network
-    Client.response_as Client.post(url, body), as: %CloudAPI.Network{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Network{}
   end
 
   @doc """
@@ -1474,14 +1654,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - vlan_id: String that represents the VLAN id.
     - id: String that represents the Network id.
   """
-  @spec delete_fabric_network(String.t(), String.t(), String.t()) :: Tuple.t()
-  def delete_fabric_network(login \\ "my", vlan_id, id) do
-    url = "/" <> login <> "/fabrics/default/vlans/" <>  vlan_id <> "/networks/" <> id
-    Client.response_as Client.delete(url)
+  @spec delete_fabric_network(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_fabric_network(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan_id, id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <>  vlan_id <> "/networks/" <> id
+    Client.response_as Client.delete(url, auth_headers)
   end
 
 
@@ -1492,12 +1674,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_networks(String.t()) :: Tuple.t()
-  def list_networks(login \\ "my") do
-    url = "/" <> login <> "/networks"
-    Client.response_as Client.get(url), as: [%CloudAPI.Network{}]
+  @spec list_networks(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_networks(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/networks"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Network{}]
   end
 
   @doc """
@@ -1505,13 +1689,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the Network id.
   """
-  @spec get_network(String.t(), String.t()) :: Tuple.t()
-  def get_network(login \\ "my", id) do
-    url = "/" <> login <> "/networks/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Network{}
+  @spec get_network(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_network(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/networks/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Network{}
   end
 
   @doc """
@@ -1529,13 +1715,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the Network id.
   """
-  @spec list_network_ips(String.t(), String.t()) :: Tuple.t()
-  def list_network_ips(login \\ "my", id) do
-    url = "/" <> login <> "/networks/" <> id <> "/ips"
-    Client.response_as Client.get(url), as: [%CloudAPI.Network.IP{}]
+  @spec list_network_ips(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_network_ips(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/networks/" <> id <> "/ips"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Network.IP{}]
   end
 
   @doc """
@@ -1543,14 +1731,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String that represents the Network id.
     - ip: String that represents the IP.
   """
-  @spec get_network_ip(String.t(), CloudAPI.Account.t()) :: Tuple.t()
-  def get_network_ip(login \\ "my", id, ip) do
-    url = "/" <> login <> "/networks/" <> id <> "/ips/" <> ip
-    Client.response_as Client.get(url), as: %CloudAPI.Network.IP{}
+  @spec get_network_ip(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Account.t()) :: Tuple.t()
+  def get_network_ip(dc = %CloudAPI.Datacenter{}, login \\ "my", id, ip) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/networks/" <> id <> "/ips/" <> ip
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Network.IP{}
   end
 
 
@@ -1561,13 +1751,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - machine_id: String that represents the machine id.
   """
-  @spec list_nics(String.t(), String.t()) :: Tuple.t()
-  def list_nics(login \\ "my", machine_id) do
-    url = "/" <> login <> "/machines/" <> machine_id <> "/nics"
-    Client.response_as Client.get(url), as: [%CloudAPI.NIC{}]
+  @spec list_nics(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_nics(dc = %CloudAPI.Datacenter{}, login \\ "my", machine_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> machine_id <> "/nics"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.NIC{}]
   end
 
   @doc """
@@ -1577,14 +1769,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - machine_id: String that represents the machine id.
     - mac: String that represents the NIC's MAC Address.
   """
-  @spec get_nic(String.t(), String.t(), String.t()) :: Tuple.t()
-  def get_nic(login \\ "my", machine_id, mac) do
-    url = "/" <> login <> "/machines/" <> machine_id <> "/nics/" <> mac
-    Client.response_as Client.get(url), as: %CloudAPI.NIC{}
+  @spec get_nic(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def get_nic(dc = %CloudAPI.Datacenter{}, login \\ "my", machine_id, mac) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> machine_id <> "/nics/" <> mac
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.NIC{}
   end
 
   @doc """
@@ -1594,17 +1788,19 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - machine_id: String that represents the machine id.
     - network_id: String that represents the network id.
   """
-  @spec add_nic(String.t(), String.t(), String.t()) :: Tuple.t()
-  def add_nic(login \\ "my", machine_id, network_id) do
-    url = "/" <> login <> "/machines/" <> machine_id <> "/nics"
+  @spec add_nic(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def add_nic(dc = %CloudAPI.Datacenter{}, login \\ "my", machine_id, network_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> machine_id <> "/nics"
     body = Poison.encode! %{
       network: network_id
     }
-    Client.response_as Client.post(url, body), as: %CloudAPI.NIC{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.NIC{}
   end
 
   @doc """
@@ -1616,14 +1812,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - machine_id: String that represents the machine id.
     - mac: String that represents the NIC's MAC Address.
   """
-  @spec remove_nic(String.t(), String.t(), String.t()) :: Tuple.t()
-  def remove_nic(login \\ "my", machine_id, mac) do
-    url = "/" <> login <> "/machines/" <>  machine_id <> "/nics/" <> mac
-    Client.response_as Client.delete(url)
+  @spec remove_nic(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def remove_nic(dc = %CloudAPI.Datacenter{}, login \\ "my", machine_id, mac) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <>  machine_id <> "/nics/" <> mac
+    Client.response_as Client.delete(url, auth_headers)
   end
 
 
@@ -1634,12 +1832,14 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
   """
-  @spec list_volumes(String.t()) :: Tuple.t()
-  def list_volumes(login \\ "my") do
-    url = "/" <> login <> "/volumes"
-    Client.response_as Client.get(url), as: [%CloudAPI.Volume{}]
+  @spec list_volumes(CloudAPI.Datacenter.t(), String.t()) :: Tuple.t()
+  def list_volumes(dc = %CloudAPI.Datacenter{}, login \\ "my") do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/volumes"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Volume{}]
   end
 
   @doc """
@@ -1647,13 +1847,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String represents the volume id.
   """
-  @spec get_volume(String.t(), String.t()) :: Tuple.t()
-  def get_volume(login \\ "my", id) do
-    url = "/" <> login <> "/volumes/" <> id
-    Client.response_as Client.get(url), as: %CloudAPI.Volume{}
+  @spec get_volume(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def get_volume(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/volumes/" <> id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Volume{}
   end
 
   @doc """
@@ -1661,14 +1863,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - volume: %CloudAPI.Volume{} with the details you want updated.
   """
-  @spec create_volume(String.t(), CloudAPI.Volume.t()) :: Tuple.t()
-  def create_volume(login \\ "my", volume = %CloudAPI.Volume{}) do
-    url = "/" <> login <> "/volumes"
+  @spec create_volume(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Volume.t()) :: Tuple.t()
+  def create_volume(dc = %CloudAPI.Datacenter{}, login \\ "my", volume = %CloudAPI.Volume{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/volumes"
     body = Poison.encode! volume
-    Client.response_as Client.post(url, body), as: %CloudAPI.Volume{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Volume{}
   end
 
   @doc """
@@ -1676,14 +1880,16 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - volume: %CloudAPI.Volume{} with the details you want updated.
   """
-  @spec update_volume(String.t(), CloudAPI.Volume.t()) :: Tuple.t()
-  def update_volume(login \\ "my", volume = %CloudAPI.Volume{}) do
-    url = "/" <> login <> "/volumes/" <> volume.id
+  @spec update_volume(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Volume.t()) :: Tuple.t()
+  def update_volume(dc = %CloudAPI.Datacenter{}, login \\ "my", volume = %CloudAPI.Volume{}) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/volumes/" <> volume.id
     body = Poison.encode! volume
-    Client.response_as Client.post(url, body), as: %CloudAPI.Volume{}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Volume{}
   end
 
   @doc """
@@ -1691,13 +1897,15 @@ defmodule CloudAPI do
 
   ## Parameters
 
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - id: String represents the volume id.
   """
-  @spec delete_volume(String.t(), String.t()) :: Tuple.t()
-  def delete_volume(login \\ "my", id) do
-    url = "/" <> login <> "/volumes/" <> id
-    Client.response_as Client.delete(url)
+  @spec delete_volume(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_volume(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/volumes/" <> id
+    Client.response_as Client.delete(url, auth_headers)
   end
 end
 
