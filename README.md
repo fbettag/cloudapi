@@ -10,7 +10,7 @@ by adding `cloudapi` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:cloudapi, "~> 0.0.3"}
+    {:cloudapi, "~> 0.0.4"}
   ]
 end
 ```

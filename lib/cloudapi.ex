@@ -5,6 +5,22 @@ defmodule CloudAPI do
 
   alias CloudAPI.Client
 
+  @doc """
+  This is a helper to use the default `Datacenter` configured using `config`.
+  You can also just create these on demand (e.g. database) and pass them as
+  argument to all functions.
+  """
+  @spec default_dc() :: CloudAPI.Datacenter.t()
+  def default_dc do
+    %CloudAPI.Datacenter{
+      endpoint: Application.get_env(:cloudapi, :endpoint),
+      account: Application.get_env(:cloudapi, :account),
+      keyfile: Application.get_env(:cloudapi, :keyfile),
+      keyname: Application.get_env(:cloudapi, :keyname)
+    }
+  end
+
+
   # Account
 
   @doc """
