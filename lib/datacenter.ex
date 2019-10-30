@@ -12,4 +12,10 @@ defmodule CloudAPI.Datacenter do
     field :keyfile, :string
     field :keyname, :string
   end
+
+  def changeset(datacenter, attrs) do
+    datacenter
+    |> cast(attrs, [:endpoint, :account, :keyfile, :keyname])
+    |> validate_required([:endpoint, :account, :keyfile, :keyname])
+  end
 end
