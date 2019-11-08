@@ -3,6 +3,7 @@ defmodule CloudAPI.Config do
   This structure represents a CloudAPI Config
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

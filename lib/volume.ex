@@ -3,6 +3,7 @@ defmodule CloudAPI.Volume do
   This structure represents a CloudAPI Volume
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

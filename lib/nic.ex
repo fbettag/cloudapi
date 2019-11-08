@@ -3,6 +3,7 @@ defmodule CloudAPI.NIC do
   This structure represents a CloudAPI NIC
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

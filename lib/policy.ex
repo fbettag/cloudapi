@@ -3,6 +3,7 @@ defmodule CloudAPI.Policy do
   This structure represents a CloudAPI Policy
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do

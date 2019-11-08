@@ -3,6 +3,7 @@ defmodule CloudAPI.Image do
   This structure represents a CloudAPI Image
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -31,6 +32,7 @@ defmodule CloudAPI.Image.Requirements do
   This structure represents a CloudAPI Image Requirement.
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -47,6 +49,7 @@ defmodule CloudAPI.Image.File do
   This structure represents a CloudAPI Image File.
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   embedded_schema do
     field :compression, :string
@@ -60,6 +63,7 @@ defmodule CloudAPI.CreateImageFromMachine do
   This structure represents data to create a CloudAPI Image from a Virtual Machine
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

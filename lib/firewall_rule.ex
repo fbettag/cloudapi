@@ -3,6 +3,7 @@ defmodule CloudAPI.FirewallRule do
   This structure represents a CloudAPI Firewall Rule
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

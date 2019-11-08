@@ -3,6 +3,7 @@ defmodule CloudAPI.Machine do
   This structure represents a CloudAPI Machine
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -38,6 +39,7 @@ defmodule CloudAPI.Machine.Volume do
   This structure represents a CloudAPI Machine Volume during creation
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -53,6 +55,7 @@ defmodule CloudAPI.Machine.Snapshot do
   This structure represents a CloudAPI Machine Snapshot
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -67,6 +70,7 @@ defmodule CloudAPI.Machine.Disk do
   This structure represents a CloudAPI Machine Disk
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -82,6 +86,7 @@ defmodule CloudAPI.CreateMachine do
   This structure represents a CloudAPI Machine Create
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -99,6 +104,13 @@ defmodule CloudAPI.CreateMachine do
     embeds_many :volumes, CloudAPI.CreateMachine.Volume
     embeds_many :disks, CloudAPI.CreateMachine.Disk
   end
+
+  @doc false
+  def changeset(machine, attrs) do
+    machine
+    |> cast(attrs, [:name, :package, :image, :networks, :affinity, :firewall_enabled,
+                    :deletion_protection, :allow_shared_images, :metadata, :tags])
+  end
 end
 
 defmodule CloudAPI.CreateMachine.Volume do
@@ -106,6 +118,7 @@ defmodule CloudAPI.CreateMachine.Volume do
   This structure represents a CloudAPI Machine Create Volume
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

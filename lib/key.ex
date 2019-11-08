@@ -3,6 +3,7 @@ defmodule CloudAPI.Key do
   This structure represents a CloudAPI Key
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:fingerprint, :string, []}
   embedded_schema do

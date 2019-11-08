@@ -3,6 +3,7 @@ defmodule CloudAPI.Migration do
   This structure represents a CloudAPI Migration
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -22,6 +23,7 @@ defmodule CloudAPI.Migration.ProgressHistory do
   This structure represents a CloudAPI Migration Progress-History Event
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

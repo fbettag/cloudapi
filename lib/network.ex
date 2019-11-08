@@ -3,6 +3,7 @@ defmodule CloudAPI.Network do
   This structure represents a CloudAPI Network
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -25,6 +26,7 @@ defmodule CloudAPI.Network.IP do
   This structure represents a CloudAPI Network IP
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do

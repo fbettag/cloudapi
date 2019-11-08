@@ -3,6 +3,7 @@ defmodule CloudAPI.Role do
   This structure represents a CloudAPI Role
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -17,6 +18,7 @@ defmodule CloudAPI.Role.Policy do
   This structure represents a Role Policy
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -29,6 +31,7 @@ defmodule CloudAPI.Role.Member do
   This structure represents a Role Member
   """
   use Ecto.Schema
+  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
