@@ -1,16 +1,15 @@
 defmodule CloudAPI.Migration do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Migration
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
     field :machine, Ecto.UUID
     field :automatic, :boolean
-    field :created_at, :time # FIXME alias from created_timestamp
-    field :scheduled_at, :time # FIXME alias from scheduled_timestamp
+    field :created_at, :time
+    field :scheduled_at, :time
     field :phase, :string
     field :state, :string
     field :error, :string
@@ -19,11 +18,10 @@ defmodule CloudAPI.Migration do
 end
 
 defmodule CloudAPI.Migration.ProgressHistory do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Migration Progress-History Event
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -38,4 +36,3 @@ defmodule CloudAPI.Migration.ProgressHistory do
     field :total_progress, :integer
   end
 end
-

@@ -1,9 +1,8 @@
 defmodule CloudAPI.Machine do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Machine
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -17,7 +16,7 @@ defmodule CloudAPI.Machine do
     field :metadata, :map
     field :tags, :map
     field :docker, :boolean
-    field :primary_ip, :string # FIXME alias from primaryIp
+    field :primary_ip, :string
     field :ips, {:array, :string}
     field :networks, {:array, Ecto.UUID}
     field :firewall_enabled, :boolean
@@ -29,17 +28,31 @@ defmodule CloudAPI.Machine do
 
     embeds_many :disks, CloudAPI.Machine.Disk
 
-    field :created_at, :time # FIXME map from created
-    field :updated_at, :time # FIXME map from updated
+    field :created_at, :time
+    field :updated_at, :time
+  end
+end
+
+defmodule CloudAPI.Machine.Volume do
+  @moduledoc """
+  This structure represents a CloudAPI Machine Volume during creation
+  """
+  use Ecto.Schema
+
+  @primary_key false
+  embedded_schema do
+    field :name, :string
+    field :type, :string
+    field :mode, :string
+    field :mountpoint, :string
   end
 end
 
 defmodule CloudAPI.Machine.Snapshot do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Machine Snapshot
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -50,11 +63,10 @@ defmodule CloudAPI.Machine.Snapshot do
 end
 
 defmodule CloudAPI.Machine.Disk do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Machine Disk
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -66,11 +78,10 @@ defmodule CloudAPI.Machine.Disk do
 end
 
 defmodule CloudAPI.CreateMachine do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Machine Create
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -78,10 +89,12 @@ defmodule CloudAPI.CreateMachine do
     field :package, Ecto.UUID
     field :image, Ecto.UUID
     field :networks, {:array, Ecto.UUID}
-    field :affinity, {:array, :map}
+    field :affinity, {:array, :string}, default: []
     field :firewall_enabled, :boolean, default: false
     field :deletion_protection, :boolean, default: false
     field :allow_shared_images, :boolean, default: false
+    field :metadata, :map
+    field :tags, :map
 
     embeds_many :volumes, CloudAPI.CreateMachine.Volume
     embeds_many :disks, CloudAPI.CreateMachine.Disk
@@ -89,11 +102,10 @@ defmodule CloudAPI.CreateMachine do
 end
 
 defmodule CloudAPI.CreateMachine.Volume do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Machine Create Volume
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -105,7 +117,7 @@ defmodule CloudAPI.CreateMachine.Volume do
 end
 
 defmodule CloudAPI.CreateMachine.Disk do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Machine Disk during Creation
   """
   import CloudAPI.Machine.Disk

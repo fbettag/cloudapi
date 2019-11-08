@@ -1,9 +1,8 @@
 defmodule CloudAPI.Network do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Network
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key {:id, Ecto.UUID, autogenerate: true}
   embedded_schema do
@@ -22,11 +21,10 @@ defmodule CloudAPI.Network do
 end
 
 defmodule CloudAPI.Network.IP do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Network IP
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -37,5 +35,3 @@ defmodule CloudAPI.Network.IP do
     field :belongs_to_uuid, Ecto.UUID
   end
 end
-
-

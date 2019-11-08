@@ -1,9 +1,8 @@
 defmodule CloudAPI.VLAN do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI VLAN
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -12,6 +11,3 @@ defmodule CloudAPI.VLAN do
     field :description, :string
   end
 end
-
-
-

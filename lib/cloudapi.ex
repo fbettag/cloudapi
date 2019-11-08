@@ -20,7 +20,6 @@ defmodule CloudAPI do
     }
   end
 
-
   # Account
 
   @doc """
@@ -49,11 +48,10 @@ defmodule CloudAPI do
   @spec update_account(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Account.t()) :: Tuple.t()
   def update_account(dc = %CloudAPI.Datacenter{}, login \\ "my", account = %CloudAPI.Account{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
-    body = Poison.encode! account
+    body = {:form, Enum.map(Map.from_struct(account), fn {field, value} -> {field, value} end)}
     url = dc.endpoint <> "/" <> login
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Config{}
   end
-
 
   # Keys
 
@@ -101,7 +99,7 @@ defmodule CloudAPI do
   def create_key(dc = %CloudAPI.Datacenter{}, login \\ "my", key = %CloudAPI.Key{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/keys"
-    body = Poison.encode! key
+    body = {:form, Enum.map(Map.from_struct(key), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Key{}
   end
 
@@ -120,7 +118,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/keys/" <> name_or_fingerprint
     Client.response_as Client.delete(url, auth_headers)
   end
-
 
   # Users
 
@@ -168,7 +165,7 @@ defmodule CloudAPI do
   def create_user(dc = %CloudAPI.Datacenter{}, login \\ "my", user = %CloudAPI.Account{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/users"
-    body = Poison.encode! user
+    body = {:form, Enum.map(Map.from_struct(user), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Account{}
   end
 
@@ -187,7 +184,7 @@ defmodule CloudAPI do
   def update_user(dc = %CloudAPI.Datacenter{}, login \\ "my", user = %CloudAPI.Account{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/users/" <> user.id
-    body = Poison.encode! user
+    body = {:form, Enum.map(Map.from_struct(user), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Account{}
   end
 
@@ -205,10 +202,10 @@ defmodule CloudAPI do
   def change_user_password(dc = %CloudAPI.Datacenter{}, login \\ "my", id, password) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/users/" <> id <> "/change_password"
-    body = Poison.encode! %{
-      password: password,
-      password_confirmation: password,
-    }
+    body = {:form, [
+      {"password", password},
+      {"password_confirmation", password},
+    ]}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Account{}
   end
 
@@ -227,7 +224,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/users/" <> id
     Client.response_as Client.delete(url, auth_headers)
   end
-
 
   # Roles
 
@@ -281,7 +277,7 @@ defmodule CloudAPI do
   def create_role(dc = %CloudAPI.Datacenter{}, login \\ "my", role = %CloudAPI.Role{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/roles"
-    body = Poison.encode! role
+    body = {:form, Enum.map(Map.from_struct(role), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Role{
       policies: [%CloudAPI.Role.Policy{}],
       members: [%CloudAPI.Role.Member{}]
@@ -301,7 +297,7 @@ defmodule CloudAPI do
   def update_role(dc = %CloudAPI.Datacenter{}, login \\ "my", role = %CloudAPI.Role{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/roles/" <> role.id
-    body = Poison.encode! role
+    body = {:form, Enum.map(Map.from_struct(role), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Role{
       policies: [%CloudAPI.Role.Policy{}],
       members: [%CloudAPI.Role.Member{}]
@@ -323,7 +319,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/roles/" <> id
     Client.response_as Client.delete(url, auth_headers)
   end
-
 
   # Policy
 
@@ -371,7 +366,7 @@ defmodule CloudAPI do
   def create_policy(dc = %CloudAPI.Datacenter{}, login \\ "my", policy = %CloudAPI.Policy{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/policies"
-    body = Poison.encode! policy
+    body = {:form, Enum.map(Map.from_struct(policy), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Policy{}
   end
 
@@ -388,7 +383,7 @@ defmodule CloudAPI do
   def update_policy(dc = %CloudAPI.Datacenter{}, login \\ "my", policy = %CloudAPI.Policy{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/policies/" <> policy.id
-    body = Poison.encode! policy
+    body = {:form, Enum.map(Map.from_struct(policy), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Policy{}
   end
 
@@ -407,7 +402,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/policies/" <> id
     Client.response_as Client.delete(url, auth_headers)
   end
-
 
   # User SSH user_keys
 
@@ -458,7 +452,7 @@ defmodule CloudAPI do
   def create_user_key(dc = %CloudAPI.Datacenter{}, login \\ "my", user, key = %CloudAPI.Key{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/users/" <> user <> "/keys"
-    body = Poison.encode! key
+    body = {:form, Enum.map(Map.from_struct(key), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Key{}
   end
 
@@ -478,7 +472,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/users/" <> user <> "/keys/" <> name_or_fingerprint
     Client.response_as Client.delete(url, auth_headers)
   end
-
 
   # Config
 
@@ -509,11 +502,10 @@ defmodule CloudAPI do
   @spec update_config(CloudAPI.Datacenter.t(), String.t(), CloudAPI.Config.t()) :: Tuple.t()
   def update_config(dc = %CloudAPI.Datacenter{}, login \\ "my", config = %CloudAPI.Config{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
-    body = Poison.encode! config
+    body = {:form, Enum.map(Map.from_struct(config), fn {field, value} -> {field, value} end)}
     url = dc.endpoint <> "/" <> login <> "/config"
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Config{}
   end
-
 
   # Datacenters
 
@@ -527,7 +519,6 @@ defmodule CloudAPI do
     Client.response_as Client.get("/my/datacenters", auth_headers)
   end
 
-
   # Services
 
   @doc """
@@ -539,7 +530,6 @@ defmodule CloudAPI do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     Client.response_as Client.get("/my/services", auth_headers)
   end
-
 
   # Images
 
@@ -622,11 +612,15 @@ defmodule CloudAPI do
     - login: String that represents the Cloud Portal Login. Defaults to "my".
     - create_image: %CloudAPI.CreateImageFromMachine{} with the details you want updated.
   """
-  @spec create_image_from_machine(CloudAPI.Datacenter.t(), String.t(), CloudAPI.CloudAPI.CreateImageFromMachine.t()) :: Tuple.t()
+  @spec create_image_from_machine(
+    CloudAPI.Datacenter.t(),
+    String.t(),
+    CloudAPI.CloudAPI.CreateImageFromMachine.t()
+  ) :: Tuple.t()
   def create_image_from_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", create_image = %CloudAPI.CreateImageFromMachine{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/images"
-    body = Poison.encode! create_image
+    body = {:form, Enum.map(Map.from_struct(create_image), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers)
   end
 
@@ -665,7 +659,7 @@ defmodule CloudAPI do
   def update_image(dc = %CloudAPI.Datacenter{}, login \\ "my", image = %CloudAPI.Image{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/images/" <> image.id <> "?action=update"
-    body = Poison.encode! image
+    body = {:form, Enum.map(Map.from_struct(image), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Image{
       requirements: %CloudAPI.Image.Requirements{},
       files: [%CloudAPI.Image.File{}]
@@ -694,7 +688,6 @@ defmodule CloudAPI do
       files: [%CloudAPI.Image.File{}]
     }
   end
-
 
   # Packages
 
@@ -728,7 +721,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/packages/" <> id
     Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Package{}
   end
-
 
   # Machines
 
@@ -804,7 +796,7 @@ defmodule CloudAPI do
   def create_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", machine = %CloudAPI.CreateMachine{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines"
-    body = Poison.encode! machine
+    body = {:form, Enum.map(Map.from_struct(machine), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Machine{}
   end
 
@@ -894,10 +886,10 @@ defmodule CloudAPI do
   def resize_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id, package_id) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=resize"
-    body = Poison.encode! %{
+    body = {:form, [
       action: "resize",
       package: package_id
-    }
+    ]}
     Client.response_as Client.post(url, body, auth_headers)
   end
 
@@ -915,10 +907,10 @@ defmodule CloudAPI do
   def rename_machine(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "?action=resize"
-    body = Poison.encode! %{
-      action: "resize",
-      name: name
-    }
+    body = {:form, [
+      {"action", "resize"},
+      {"name", name},
+    ]}
     Client.response_as Client.post(url, body, auth_headers)
   end
 
@@ -1006,9 +998,9 @@ defmodule CloudAPI do
   def create_machine_snapshot(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/snapshots"
-    body = Poison.encode! %{
-      name: name
-    }
+    body = {:form, [
+      {"name", name},
+    ]}
     Client.response_as Client.post(url, body, auth_headers)
   end
 
@@ -1059,7 +1051,7 @@ defmodule CloudAPI do
   def get_machine_snapshot(dc = %CloudAPI.Datacenter{}, login \\ "my", id, name) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/snapshots/" <> name
-    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Machine{}
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Machine.Snapshot{}
   end
 
   @doc """
@@ -1079,11 +1071,116 @@ defmodule CloudAPI do
     Client.response_as Client.delete(url, auth_headers)
   end
 
-  # TODO CreateMachineDisk (bhyve)
-  # TODO ResizeMachineDisk (bhyve)
-  # TODO GetMachineDisk (bhyve)
-  # TODO ListMachineDisks (bhyve)
-  # TODO DeleteMachineDisk (bhyve)
+  @doc """
+  Create a new disk for a bhyve VM.
+
+  The sum of all disk sizes on a VM is limited by flexible disk space. This operation only applies for VMs that are currently stopped.
+
+  ## Parameters
+
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
+    - login: String that represents the Cloud Portal Login. Defaults to "my".
+    - id: String that represents the id of the machine.
+    - size_mb: Integer that represents the size of the new disk in MiB.
+  """
+  @spec create_machine_disk(CloudAPI.Datacenter.t(), String.t(), String.t(), CloudAPI.Machine.Disk.t()) :: Tuple.t()
+  def create_machine_disk(dc = %CloudAPI.Datacenter{}, login \\ "my", id, size_mb, pci_slot \\ nil) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/disks"
+    body = {:form, [
+      {"pci_slot", pci_slot},
+      {"size", size_mb},
+    ]}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Machine.Disk{}
+  end
+
+  @doc """
+  Asynchronously resize an existing disk on a bhyve VM.
+
+  The sum of all disk sizes on a VM is limited by flexible disk space. This operation only applies for VMs that are currently stopped.
+
+  When resizing down, dangerous_allow_shrink must be set to true otherwise the resize will be rejected. Since shrinking a disk truncates any data within that disk, it can cause filesystem corruption and data loss if the guest operating system does not handle it appropriately and data on the disk hasn't been prepared properly beforehand.
+
+  Since this is an asynchronous operation, resizing may take several seconds. Check the disk's state using `get_machine_disk`.
+
+  ## Parameters
+
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
+    - login: String that represents the Cloud Portal Login. Defaults to "my".
+    - id: String that represents the id of the machine.
+    - disk_id: String that represents the id of the disk.
+    - size_mb: Integer that represents the size of the new disk in MiB.
+    - dangerous_allow_shrink: Boolean that represents wether to allow shrinking of disks.
+  """
+  @spec resize_machine_disk(
+    CloudAPI.Datacenter.t(),
+    String.t(),
+    String.t(),
+    String.t(),
+    Integer.t(),
+    Boolean.t()
+  ) :: Tuple.t()
+  def resize_machine_disk(dc = %CloudAPI.Datacenter{}, login \\ "my", id, disk_id, size_mb, dangerous_allow_shrink \\ false) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/disks/" <> disk_id
+    body = {:form, [
+      {"size", size_mb},
+      {"dangerous_allow_shrink", dangerous_allow_shrink},
+    ]}
+    Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Machine.Disk{}
+  end
+
+  @doc """
+  List all disk on a bhyve VM.
+
+  ## Parameters
+
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
+    - login: String that represents the Cloud Portal Login. Defaults to "my".
+    - id: String that represents the id of the machine.
+  """
+  @spec list_machine_disks(CloudAPI.Datacenter.t(), String.t(), String.t()) :: Tuple.t()
+  def list_machine_disks(dc = %CloudAPI.Datacenter{}, login \\ "my", id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/disks"
+    Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Machine.Disk{}]
+  end
+
+  @doc """
+  Fetch a specific disk on a bhyve VM.
+
+  ## Parameters
+
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
+    - login: String that represents the Cloud Portal Login. Defaults to "my".
+    - id: String that represents the id of the machine.
+    - disk_id: String that represents the id of the disk.
+  """
+  @spec get_machine_disk(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def get_machine_disk(dc = %CloudAPI.Datacenter{}, login \\ "my", id, disk_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/disks/" <> disk_id
+    Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Machine.Disk{}
+  end
+
+  @doc """
+  Asynchronously delete a disk off a bhyve VM.
+
+  Since this is an asynchronous operation, deletion may take several seconds. You can check the disk's state using `get_machine_disk`.
+
+  ## Parameters
+
+    - dc: %CloudAPI.Datacenter{} with the details for how to connect to this datacenter.
+    - login: String that represents the Cloud Portal Login. Defaults to "my".
+    - id: String that represents the id of the machine.
+    - disk_id: String that represents the id of the disk.
+  """
+  @spec delete_machine_disk(CloudAPI.Datacenter.t(), String.t(), String.t(), String.t()) :: Tuple.t()
+  def delete_machine_disk(dc = %CloudAPI.Datacenter{}, login \\ "my", id, disk_id) do
+    auth_headers = CloudAPI.Client.auth_headers(dc)
+    url = dc.endpoint <> "/" <> login <> "/machines/" <>  id <> "/disks/" <> disk_id
+    Client.response_as Client.delete(url, auth_headers)
+  end
 
   @doc """
   Allows you to update the metadata for a given instance. Note that updating the metadata via CloudAPI will result in the metadata being updated in the running instance.
@@ -1101,7 +1198,7 @@ defmodule CloudAPI do
   def update_machine_metadata(dc = %CloudAPI.Datacenter{}, login \\ "my", id, metadata = %{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/metadata"
-    body = Poison.encode! metadata
+    body = {:form, Enum.map(Map.from_struct(metadata), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers)
   end
 
@@ -1186,7 +1283,7 @@ defmodule CloudAPI do
   def add_machine_tags(dc = %CloudAPI.Datacenter{}, login \\ "my", id, tags = %{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags"
-    body = Poison.encode! tags
+    body = {:form, Enum.map(Map.from_struct(tags), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers)
   end
 
@@ -1204,7 +1301,7 @@ defmodule CloudAPI do
   def replace_machine_tags(dc = %CloudAPI.Datacenter{}, login \\ "my", id, tags = %{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/tags"
-    body = Poison.encode! tags
+    body = {:form, Enum.map(Map.from_struct(tags), fn {field, value} -> {field, value} end)}
     Client.response_as Client.put(url, body, auth_headers)
   end
 
@@ -1292,7 +1389,6 @@ defmodule CloudAPI do
     Client.response_as Client.get(url, nil, auth_headers)
   end
 
-
   # Migrations
 
   @doc """
@@ -1351,13 +1447,12 @@ defmodule CloudAPI do
   def migrate(dc = %CloudAPI.Datacenter{}, login \\ "my", id, action, affinity \\ []) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> id <> "/migrate"
-    body = Poison.encode! %{
-      action: action,
-      affinity: affinity
-    }
+    body = {:form, [
+      {"action", action},
+      {"affinity", affinity},
+    ]}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Migration{}
   end
-
 
   # Firewall Rules
 
@@ -1405,7 +1500,7 @@ defmodule CloudAPI do
   def create_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", fwrule = %CloudAPI.FirewallRule{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/fwrules"
-    body = Poison.encode! fwrule
+    body = {:form, Enum.map(Map.from_struct(fwrule), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.FirewallRule{}
   end
 
@@ -1422,7 +1517,7 @@ defmodule CloudAPI do
   def update_firewall_rule(dc = %CloudAPI.Datacenter{}, login \\ "my", fwrule = %CloudAPI.FirewallRule{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/fwrules/" <> fwrule.id
-    body = Poison.encode! fwrule
+    body = {:form, Enum.map(Map.from_struct(fwrule), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.FirewallRule{}
   end
 
@@ -1506,7 +1601,6 @@ defmodule CloudAPI do
     Client.response_as Client.get(url, auth_headers), as: [%CloudAPI.Machine{}]
   end
 
-
   # Fabrics
 
   @doc """
@@ -1559,7 +1653,7 @@ defmodule CloudAPI do
   def create_fabric_vlan(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan = %CloudAPI.VLAN{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlan"
-    body = Poison.encode! vlan
+    body = {:form, Enum.map(Map.from_struct(vlan), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.VLAN{}
   end
 
@@ -1576,7 +1670,7 @@ defmodule CloudAPI do
   def update_fabric_vlan(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan = %CloudAPI.VLAN{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlan/" <> vlan.id
-    body = Poison.encode! vlan
+    body = {:form, Enum.map(Map.from_struct(vlan), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.VLAN{}
   end
 
@@ -1643,7 +1737,7 @@ defmodule CloudAPI do
   def create_fabric_network(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan_id, network = %CloudAPI.Network{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks"
-    body = Poison.encode! network
+    body = {:form, Enum.map(Map.from_struct(network), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Network{}
   end
 
@@ -1661,7 +1755,7 @@ defmodule CloudAPI do
   def update_fabric_network(dc = %CloudAPI.Datacenter{}, login \\ "my", vlan_id, network = %CloudAPI.Network{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <> vlan_id <> "/networks/" <> network.id
-    body = Poison.encode! network
+    body = {:form, Enum.map(Map.from_struct(network), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Network{}
   end
 
@@ -1681,7 +1775,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/fabrics/default/vlans/" <>  vlan_id <> "/networks/" <> id
     Client.response_as Client.delete(url, auth_headers)
   end
-
 
   # Networks
 
@@ -1759,7 +1852,6 @@ defmodule CloudAPI do
     Client.response_as Client.get(url, auth_headers), as: %CloudAPI.Network.IP{}
   end
 
-
   # NICs
 
   @doc """
@@ -1813,9 +1905,9 @@ defmodule CloudAPI do
   def add_nic(dc = %CloudAPI.Datacenter{}, login \\ "my", machine_id, network_id) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/machines/" <> machine_id <> "/nics"
-    body = Poison.encode! %{
-      network: network_id
-    }
+    body = {:form, [
+      {"network", network_id},
+    ]}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.NIC{}
   end
 
@@ -1839,7 +1931,6 @@ defmodule CloudAPI do
     url = dc.endpoint <> "/" <> login <> "/machines/" <>  machine_id <> "/nics/" <> mac
     Client.response_as Client.delete(url, auth_headers)
   end
-
 
   # Volumes
 
@@ -1887,7 +1978,7 @@ defmodule CloudAPI do
   def create_volume(dc = %CloudAPI.Datacenter{}, login \\ "my", volume = %CloudAPI.Volume{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/volumes"
-    body = Poison.encode! volume
+    body = {:form, Enum.map(Map.from_struct(volume), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Volume{}
   end
 
@@ -1904,7 +1995,7 @@ defmodule CloudAPI do
   def update_volume(dc = %CloudAPI.Datacenter{}, login \\ "my", volume = %CloudAPI.Volume{}) do
     auth_headers = CloudAPI.Client.auth_headers(dc)
     url = dc.endpoint <> "/" <> login <> "/volumes/" <> volume.id
-    body = Poison.encode! volume
+    body = {:form, Enum.map(Map.from_struct(volume), fn {field, value} -> {field, value} end)}
     Client.response_as Client.post(url, body, auth_headers), as: %CloudAPI.Volume{}
   end
 
@@ -1924,4 +2015,3 @@ defmodule CloudAPI do
     Client.response_as Client.delete(url, auth_headers)
   end
 end
-

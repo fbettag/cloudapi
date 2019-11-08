@@ -1,9 +1,8 @@
 defmodule CloudAPI.Key do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI Key
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key {:fingerprint, :string, []}
   embedded_schema do
@@ -13,5 +12,3 @@ defmodule CloudAPI.Key do
     field :multifactor, {:array, :string}, default: []
   end
 end
-
-

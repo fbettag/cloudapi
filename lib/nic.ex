@@ -1,9 +1,8 @@
 defmodule CloudAPI.NIC do
-  @typedoc """
+  @moduledoc """
   This structure represents a CloudAPI NIC
   """
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key false
   embedded_schema do
@@ -16,4 +15,3 @@ defmodule CloudAPI.NIC do
     field :network, Ecto.UUID
   end
 end
-

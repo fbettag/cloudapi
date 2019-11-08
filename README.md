@@ -10,7 +10,7 @@ by adding `cloudapi` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:cloudapi, "~> 0.0.5"}
+    {:cloudapi, "~> 0.0.6"}
   ]
 end
 ```
@@ -31,7 +31,6 @@ config :cloudapi,
 
 - add test cases
 - rewrite the HTTP Signature generation in `lib/client.ex` to pure Elixir without resorting to using OpenSSL.
-- implement `Ecto.Changeset` for record validation/sanitization.
 
 **Pull requests are welcome. :)**
 

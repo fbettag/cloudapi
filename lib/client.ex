@@ -22,14 +22,32 @@ defmodule CloudAPI.Client do
     ]
   end
 
+  defp sanitize(body) do
+    body
+    |> (&(String.replace(&1, "\"firstName\":", "\"first_name\":"))).()
+    |> (&(String.replace(&1, "\"lastName\":", "\"last_name\":"))).()
+    |> (&(String.replace(&1, "\"companyName\":", "\"company_name\":"))).()
+    |> (&(String.replace(&1, "\"primaryIp\":", "\"primary_ip\":"))).()
+    |> (&(String.replace(&1, "\"created\":", "\"created_at\":"))).()
+    |> (&(String.replace(&1, "\"updated\":", "\"updated_at\":"))).()
+    |> (&(String.replace(&1, "\"created_timestamp\":", "\"created_at\":"))).()
+    |> (&(String.replace(&1, "\"scheduled_timestamp\":", "\"scheduled_at\":"))).()
+  end
+
   def response_as(response = {_, %HTTPoison.Response{}}, as \\ [keys: :atoms]) do
     case response do
       {:ok, %{status_code: 204, body: body}} ->
         {:ok, Poison.decode!(body, as)}
       {:ok, %{status_code: 200, body: body}} ->
-        {:ok, Poison.decode!(body, as)}
+        data = body
+        |> sanitize
+        |> Poison.decode!(as)
+        {:ok, data}
       {_, %{body: body}} ->
-        {:error, Poison.decode!(body, keys: :atoms)}
+        data = body
+        |> sanitize
+        |> Poison.decode!(keys: :atoms)
+        {:error, data}
     end
   end
 end
