@@ -46,7 +46,6 @@ defmodule CloudAPI.Mixfile do
   defp aliases do
     [
       test: ["test", "credo -a --strict"],
-      "hex.publish": ["test", "hex.publish"],
     ]
   end
 end
